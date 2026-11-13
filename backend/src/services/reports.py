@@ -23,6 +23,13 @@ def deliver(db, report):
         return "'"+text if text.startswith(('=','+','-','@','\t','\r')) else text
     writer.writerow([safe(c['label']) for c in cols])
     for row in table.get('rows',[]): writer.writerow([safe(row.get(c['key'],'')) for c in cols])
+    w=j.result.get('weighted')
+    if w:
+        writer.writerow([])
+        writer.writerow([safe('班次加权比较 · 两组合并班次占比加权')])
+        wcols=w.get('table',{}).get('columns',[])
+        writer.writerow([safe(c['label']) for c in wcols])
+        for row in w.get('table',{}).get('rows',[]): writer.writerow([safe(row.get(c['key'],'')) for c in wcols])
     data=out.getvalue().encode('utf-8')
     delivery=Delivery(report_id=report.id, created_at=time.time(), checksum=hashlib.sha256(data).hexdigest(), filename='', destination=report.destination)
     db.add(delivery); db.flush()
